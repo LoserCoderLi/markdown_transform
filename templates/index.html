@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Converter</title>
+    <style>
+        /* 模态对话框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 60px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload and Convert Markdown File</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="file">Choose a zip file:</label>
+        <input type="file" id="file" name="file" accept=".zip" required><br><br>
+
+        <label for="format">Output Format:</label>
+        <select id="format" name="format" required>
+            <option value="html">HTML</option>
+            <option value="pdf">PDF</option>
+            <option value="docx">Word</option>
+        </select><br><br>
+
+        <input type="hidden" id="urlid" name="urlid">
+
+        <div id="logoUpload" style="display: none;">
+            <label for="logo">Choose a logo file:</label>
+            <input type="file" id="logo" name="logo" accept="image/*"><br><br>
+        </div>
+
+        <button type="submit">Upload and Convert</button>
+    </form>
+
+    <!-- 模态对话框 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Enter Additional Information</h2>
+            <form id="additionalForm">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title"><br><br>
+                <label for="author">Author:</label>
+                <input type="text" id="author" name="author"><br><br>
+                <label for="statement">Statement:</label>
+                <input type="text" id="statement" name="statement"><br><br>
+                <label for="left_header">Left Header:</label>
+                <input type="text" id="left_header" name="left_header"><br><br>
+                <label for="right_header">Right Header:</label>
+                <input type="text" id="right_header" name="right_header"><br><br>
+
+                <label for="cover_footer">Cover Footer:</label>
+                <input type="text" id="cover_footer" name="cover_footer"><br><br>
+
+                <button type="button" id="submitAdditional">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        var modal = document.getElementById('myModal');
+        var span = document.getElementsByClassName('close')[0];
+
+        document.getElementById('file').addEventListener('change', function() {
+            var formData = new FormData();
+            formData.append('file', this.files[0]);
+            var existingUrlid = document.getElementById('urlid').value;
+            if (existingUrlid) {
+                formData.append('urlid', existingUrlid);  // 添加已有的urlid
+            }
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("文件已上传并解压成功！");
+                    document.getElementById('urlid').value = data.urlid; // 保存urlid
+                } else {
+                    alert("文件解压失败或未找到有效的 .md 文件");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('format').addEventListener('change', function() {
+            var format = this.value;
+            var logoUpload = document.getElementById('logoUpload');
+            if (format === 'pdf' || format === 'docx') {
+                modal.style.display = 'block';
+                logoUpload.style.display = 'block';
+            } else {
+                modal.style.display = 'none';
+                logoUpload.style.display = 'none';
+            }
+        });
+
+        span.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        document.getElementById('submitAdditional').onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+
+            var format = document.getElementById('format').value;
+            if (format === 'pdf' || format === 'docx') {
+                var additionalForm = document.getElementById('additionalForm');
+                var additionalData = new FormData(additionalForm);
+                for (var pair of additionalData.entries()) {
+                    formData.append(pair[0], pair[1]);
+                }
+
+                var logo = document.getElementById('logo').files[0];
+                if (logo) {
+                    formData.append('logo', logo);
+                }
+            }
+
+            fetch('/convert', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.blob())
+            .then(blob => {
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'converted_file.' + formData.get('format');
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        window.addEventListener('beforeunload', function(event) {
+            var urlid = document.getElementById('urlid').value;
+            if (urlid) {
+                console.log('Sending cleanup request for urlid:', urlid);  // 调试信息
+                var data = new Blob([JSON.stringify({ urlid: urlid })], { type: 'application/json' });
+                navigator.sendBeacon('/cleanup', data);
+            }
+        });
+    </script>
+</body>
+</html>
