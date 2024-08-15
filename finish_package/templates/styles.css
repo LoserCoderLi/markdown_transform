@@ -1,0 +1,102 @@
+/* 设置整体页面的字体和背景颜色 */
+body {
+    font-family: Arial, sans-serif;  /* 使用Arial字体，后备字体为sans-serif */
+    margin: 20px;  /* 设置页面边距 */
+    background-color: #f9f9f9;  /* 设置背景颜色 */
+    color: #333;  /* 设置文本颜色 */
+}
+
+/* 设置各级标题的颜色和间距 */
+h1, h2, h3, h4, h5, h6 {
+    color: #444;  /* 设置标题颜色 */
+    margin-top: 1.2em;  /* 设置标题顶部间距 */
+    margin-bottom: 0.6em;  /* 设置标题底部间距 */
+}
+
+/* 设置一级标题的字体大小和底部边框 */
+h1 {
+    font-size: 2.5em;  /* 设置字体大小 */
+    border-bottom: 2px solid #ddd;  /* 设置底部边框 */
+    padding-bottom: 0.3em;  /* 设置底部内边距 */
+}
+
+/* 设置二级标题的字体大小和底部边框 */
+h2 {
+    font-size: 2em;  /* 设置字体大小 */
+    border-bottom: 1px solid #ddd;  /* 设置底部边框 */
+    padding-bottom: 0.2em;  /* 设置底部内边距 */
+}
+
+/* 设置三级标题的字体大小 */
+h3 {
+    font-size: 1.75em;  /* 设置字体大小 */
+}
+
+/* 设置段落的行高和底部间距 */
+p {
+    line-height: 1.6;  /* 设置行高 */
+    margin-bottom: 1.2em;  /* 设置底部间距 */
+}
+
+/* 设置链接的颜色和取消下划线 */
+a {
+    color: #0066cc;  /* 设置链接颜色 */
+    text-decoration: none;  /* 取消下划线 */
+}
+
+/* 设置链接悬停时的下划线 */
+a:hover {
+    text-decoration: underline;  /* 悬停时显示下划线 */
+}
+
+/* 设置无序和有序列表的左边距和底部间距 */
+ul, ol {
+    margin-left: 20px;  /* 设置左边距 */
+    margin-bottom: 1.2em;  /* 设置底部间距 */
+}
+
+/* 设置代码块的字体、背景颜色、内边距和圆角 */
+code {
+    font-family: Consolas, "Courier New", monospace;  /* 设置字体 */
+    background-color: #f4f4f4;  /* 设置背景颜色 */
+    padding: 2px 4px;  /* 设置内边距 */
+    border-radius: 4px;  /* 设置圆角 */
+}
+
+/* 设置预格式化代码块的显示样式 */
+pre code {
+    display: block;  /* 代码块显示为块级元素 */
+    padding: 10px;  /* 设置内边距 */
+    background-color: #f4f4f4;  /* 设置背景颜色 */
+    border: 1px solid #ddd;  /* 设置边框 */
+    border-radius: 4px;  /* 设置圆角 */
+    overflow-x: auto;  /* 超出时水平滚动 */
+}
+
+/* 设置引用块的样式 */
+blockquote {
+    border-left: 4px solid #ddd;  /* 设置左边框 */
+    padding-left: 1em;  /* 设置左内边距 */
+    color: #666;  /* 设置文本颜色 */
+    margin: 1.2em 0;  /* 设置上下间距 */
+    background-color: #f4f4f4;  /* 设置背景颜色 */
+}
+
+/* 设置表格的样式 */
+table {
+    width: 100%;  /* 设置表格宽度为100% */
+    border-collapse: collapse;  /* 合并边框 */
+    margin-bottom: 1.2em;  /* 设置底部间距 */
+}
+
+/* 设置表格、表头和单元格的边框和内边距 */
+table, th, td {
+    border: 1px solid #ddd;  /* 设置边框 */
+    padding: 0.6em;  /* 设置内边距 */
+}
+
+/* 设置表头的背景颜色和对齐方式 */
+th {
+    background-color: #f2f2f2;  /* 设置背景颜色 */
+    text-align: left;  /* 设置左对齐 */
+}
