@@ -6,15 +6,15 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from docx import Document
 import re
+# 1
 
-
-def generate_parameter(title, author, statement, date=""):
+def generate_parameter(title, version, statement, date=""):
     """
     生成包含文档参数的字典，包括标题、作者、声明和日期。
 
     参数:
     title (str): 文档标题
-    author (str): 文档作者
+    version (str): 版本号
     statement (str): 文档声明
     date (str): 文档日期，如果为空则使用当前日期
 
@@ -28,7 +28,7 @@ def generate_parameter(title, author, statement, date=""):
     # 创建包含文档参数的字典
     dir_parameter = {
         "title": title,
-        "author": author,
+        "version": "版本号:" + version,
         "date": date,
         "statement": statement
     }
@@ -48,6 +48,7 @@ def generate_latex_document_pdf(left_header, right_header, cover_footer, urlid):
     """
     # LaTeX 文档模板 初版存放在内存中
     latex_template = f"""
+\\usepackage{{needspace}}
 \\usepackage{{fancyhdr}}
 \\usepackage{{graphicx}}
 \\usepackage{{amsmath}}
@@ -216,7 +217,8 @@ def generate_latex_document_pdf(left_header, right_header, cover_footer, urlid):
 
     """
 
-    filename = urlid + "/document_pdf.tex"
+    filename = os.path.join('trans_docx', urlid, "document_pdf.tex")
+    # filename = os.path.join(urlid, "document_pdf.tex")
 
     # 检查文件路径的目录是否存在，如果不存在则创建目录
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -229,20 +231,144 @@ def generate_latex_document_pdf(left_header, right_header, cover_footer, urlid):
     return filename
 
 
+# 默认模板
+def generate_latex_document_no_header_footer(urlid):
+    """
+    生成一个没有页眉和页脚的简单 LaTeX 文档模板，并将其保存到指定文件。
+
+    参数:
+    urlid (str): 文件路径的唯一标识符
+    """
+    # LaTeX 文档模板存放在内存中
+    latex_template = f"""
+\\usepackage{{graphicx}}
+\\usepackage{{amsmath}}
+\\usepackage{{hyperref}}
+\\usepackage{{geometry}}
+\\usepackage{{xcolor}}
+\\usepackage{{fontspec}}
+\\usepackage{{titlesec}}
+\\usepackage{{longtable}}
+\\usepackage{{booktabs}}
+\\usepackage{{listings}}
+\\usepackage{{xeCJK}}
+\\usepackage{{etoolbox}}
+\\usepackage{{array}}
+\\usepackage{{caption}}
+\\usepackage{{tabularx}}
+\\usepackage{{needspace}}  % 添加对 needspace 包的引用
+
+% 页面布局
+\\geometry{{
+    a4paper,
+    left=25mm,
+    right=25mm,
+    top=25mm,
+    bottom=25mm,
+}}
+
+% 设置中文字体
+\\setCJKmainfont{{SimSun}}  % 使用宋体作为中文主字体
+\\setmainfont{{SimSun}}  % 设置英文字体为宋体
+
+% 取消页眉和页脚
+\\pagestyle{{empty}}
+
+% 字体和颜色设置
+\\colorlet{{mycolor}}{{blue}}
+\\newcommand{{\\highlight}}[1]{{\\textbf{{\\textcolor{{mycolor}}{{#1}}}}}}
+
+% 行间距设置
+\\renewcommand{{\\baselinestretch}}{{1.5}}  % 调整行间距为1.5倍
+
+% 章节编号和标题格式
+\\titleformat{{\\section}}{{\\normalfont\\Large\\bfseries}}{{\\thesection}}{{1em}}{{}}
+\\titleformat{{\\subsection}}{{\\normalfont\\large\\bfseries}}{{\\thesubsection}}{{1em}}{{}}
+\\titleformat{{\\subsubsection}}{{\\normalfont\\normalsize\\bfseries}}{{\\thesubsubsection}}{{1em}}{{}}
+
+% 强制显示章节和子章节编号
+\\setcounter{{secnumdepth}}{{3}}
+\\setcounter{{tocdepth}}{{3}}
+
+% 表格样式设置
+\\captionsetup[table]{{skip=10pt}}
+\\newcolumntype{{L}}[1]{{|>{{\\raggedright\\arraybackslash}}p{{#1}}|}}
+\\newcolumntype{{C}}[1]{{|>{{\\centering\\arraybackslash}}p{{#1}}|}}
+\\newcolumntype{{R}}[1]{{|>{{\\raggedleft\\arraybackslash}}p{{#1}}|}}
+
+% 代码块设置
+\\lstset{{
+    basicstyle=\\ttfamily,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\\color{{gray!10}},
+    extendedchars=true,
+    inputencoding=utf8,
+    literate={{一}}{{\\CJKchar{{"4E00}}}}1
+             {{二}}{{\\CJKchar{{"4E8C}}}}1
+             {{三}}{{\\CJKchar{{"4E09}}}}1
+             {{四}}{{\\CJKchar{{"56DB}}}}1
+             {{五}}{{\\CJKchar{{"4E94}}}}1
+             {{六}}{{\\CJKchar{{"516D}}}}1
+             {{七}}{{\\CJKchar{{"4E03}}}}1
+             {{八}}{{\\CJKchar{{"516B}}}}1
+             {{九}}{{\\CJKchar{{"4E5D}}}}1
+             {{零}}{{\\CJKchar{{"96F6}}}}1
+}}
+
+% 超链接设置
+\\hypersetup{{
+    colorlinks=true,
+    linkcolor=black,  % 设置链接颜色为黑色
+    urlcolor=black,   % 设置 URL 颜色为黑色
+    filecolor=black,  % 设置文件链接颜色为黑色
+    citecolor=black   % 设置引用颜色为黑色
+}}
+
+% 图表标题设置
+\\captionsetup[figure]{{
+    labelformat=simple,
+    labelsep=quad,
+    font=small,
+    justification=centering,
+    format=hang,
+    singlelinecheck=off
+}}
+\\renewcommand\\figurename{{图}}  % 设置图标题的前缀
+\\renewcommand\\thefigure{{\\thesection.\\arabic{{figure}}}}  % 设置图编号格式为章节号.图号
+\\makeatletter
+\\@addtoreset{{figure}}{{section}}  % 在每个章节开始时重置图片编号
+\\makeatother
+
+    """
+
+    filename = os.path.join('trans_docx', urlid, "document_no.tex")
+
+    # 检查文件路径的目录是否存在，如果不存在则创建目录
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+    # 打开文件进行写入，如果文件不存在则创建文件
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(latex_template)
+    print(f"File '{filename}' has been created/overwritten with the provided content.")
+
+    return filename
+
+
+
 # 创建带有页眉的模板
-def create_template_with_headers(template_path, title, author, date, statement, left_header, right_header):
+def create_template_with_headers(template_path, left_header, right_header):
     """
     创建一个包含页眉和页脚的DOCX模板。
 
     参数:
         template_path (str): 模板文件保存路径。
-        title (str): 文档标题。
-        author (str): 文档作者。
-        date (str): 文档日期。
-        statement (str): 可选声明。
         left_header (str): 左页眉内容。
         right_header (str): 右页眉内容。
     """
+    # 在路径前添加 trans_docx/
+    template_path = os.path.join('trans_docx', template_path)
+
     # 创建新的文档
     doc = Document()
 
@@ -281,14 +407,14 @@ def create_template_with_headers(template_path, title, author, date, statement, 
 
 
 # 添加封面页
-def add_cover_page(doc, title, author, date, statement):
+def add_cover_page(doc, title, version, date, statement):
     """
     向DOCX文档中添加封面页。
 
     参数:
         doc (Document): DOCX文档对象。
         title (str): 文档标题。
-        author (str): 文档作者。
+        version (str): 版本号。
         date (str): 文档日期。
         statement (str): 可选声明。
     """
@@ -306,10 +432,10 @@ def add_cover_page(doc, title, author, date, statement):
     doc.add_paragraph()
 
     # 作者
-    author_paragraph = doc.add_paragraph()
-    author_run = author_paragraph.add_run(author)
-    author_run.font.size = Pt(18)
-    author_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    version_paragraph = doc.add_paragraph()
+    version_run = version_paragraph.add_run(version)
+    version_run.font.size = Pt(18)
+    version_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     # 空行
     doc.add_paragraph()
@@ -373,6 +499,9 @@ def add_header_image_to_first_page(doc, image_path, right_text):
     :param image_path: str, 要添加的图片的路径。
     :param right_text: str, 要添加的右页眉的文本。
     """
+    # 在路径前添加 trans_docx/
+    image_path = os.path.join('trans_docx', image_path)
+
     section = doc.sections[0]
 
     # 确保首页页眉不同
@@ -416,6 +545,8 @@ def update_toc(docx_file_path):
     参数:
         docx_file_path (str): DOCX文档路径。
     """
+    # 在路径前添加 trans_docx/
+    docx_file_path = os.path.join('trans_docx', docx_file_path)
     # 打开文档
     doc = Document(docx_file_path)
 
@@ -482,6 +613,3 @@ def apply_headers_footers_to_sections(doc, left_header, right_header):
         run._r.append(fldChar1)
         run._r.append(instrText)
         run._r.append(fldChar2)
-
-
-

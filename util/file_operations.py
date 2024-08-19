@@ -3,21 +3,6 @@ import zipfile
 import shutil
 
 
-# def clear_directory(directory):
-#     """
-#     清空指定目录中的所有文件和子目录。
-#
-#     参数:
-#         directory (str): 要清空的目录路径。
-#     """
-#     if os.path.exists(directory):
-#         for root, dirs, files in os.walk(directory, topdown=False):
-#             for name in files:
-#                 os.remove(os.path.join(root, name))
-#             for name in dirs:
-#                 shutil.rmtree(os.path.join(root, name))
-
-
 def check_and_extract_archive(zip_path, extract_to):
     """
     解压并检查ZIP文件内容是否包含.md文件。
